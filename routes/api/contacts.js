@@ -46,7 +46,6 @@ router.post(
   asyncHandler(async (req, res, next) => {
     const { error } = contactsValidation(req.body);
     if (error) {
-      console.log(error.details[0].message);
       return res.status(400).json({ message: error.details[0].message });
     }
 
@@ -82,7 +81,6 @@ router.put(
   asyncHandler(async (req, res, next) => {
     const { error } = updateContactValidation(req.body);
     if (error) {
-      console.log(error.details[0].message);
       return res.status(400).json({ message: error.details[0].message });
     }
 
