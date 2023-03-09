@@ -1,8 +1,10 @@
-const express = require('express')
-const logger = require('morgan')
-const cors = require('cors')
+const express = require("express");
+const logger = require("morgan");
+const cors = require("cors");
+require("dotenv").config();
+require("colors");
 
-const contactsRouter = require('./routes/api/contacts')
+const contactsRouter = require("./src/routes/contacts.routes");
 
 const app = express()
 
@@ -12,7 +14,9 @@ app.use(logger(formatsLogger))
 app.use(cors())
 app.use(express.json())
 
-app.use('/api/contacts', contactsRouter)
+app.use(require("./src/middlewares/errorHandler"));
+app.use("/api/contacts", contactsRouter);
+app.use(require("./src/middlewares/badUrlError"));
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' })
