@@ -1,5 +1,5 @@
-const app = require("./app");
-const { connectDB } = require("./src/config/connection");
+const app = require('./app');
+const { connectDB } = require('./src/config/connection');
 
 const PORT = process.env.PORT || 8081;
 

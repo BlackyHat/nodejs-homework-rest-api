@@ -1,6 +1,6 @@
-module.exports = (err, req, res, next) => {
+module.exports = (err, req, res) => {
   const statusCode = res.statusCode ? res.statusCode : 500;
   res.status(statusCode);
-  const environment = process.env.NODE_ENV === "production" ? null : err.stack;
+  const environment = process.env.NODE_ENV === 'production' ? null : err.stack;
   res.json({ message: err.message, stack: environment });
 };

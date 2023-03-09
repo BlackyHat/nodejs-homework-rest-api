@@ -1,18 +1,18 @@
-const Contacts = require("../../models/contact.model");
-const asyncHandler = require("express-async-handler");
+const asyncHandler = require('express-async-handler');
+const Contacts = require('../../models/contact.model');
 
 const addContactController = asyncHandler(async (req, res) => {
   const { name, phone, email } = req.body;
 
   if (!name) {
     res.status(400);
-    throw new Error(`Error. Missing required name field.`);
+    throw new Error('Error. Missing required name field.');
   } else if (!phone) {
     res.status(400);
-    throw new Error(`Error. Missing required phone field.`);
+    throw new Error('Error. Missing required phone field.');
   } else if (!email) {
     res.status(400);
-    throw new Error(`Error. Missing required email field.`);
+    throw new Error('Error. Missing required email field.');
   }
   const newContact = { name, phone, email };
 
@@ -20,7 +20,7 @@ const addContactController = asyncHandler(async (req, res) => {
   await contact.save();
   res
     .status(201)
-    .json({ message: "Success. Contact was created.", ...newContact });
+    .json({ message: 'Success. Contact was created.', ...newContact });
 });
 
 module.exports = addContactController;
