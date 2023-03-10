@@ -1,5 +1,6 @@
-const asyncHandler = require('express-async-handler');
-const Contacts = require('../../models/contact.model');
+const asyncHandler = require("express-async-handler");
+const Contacts = require("../../models/contact.model");
+const { AppError } = require("../../utils");
 
 const updateContactController = asyncHandler(async (req, res) => {
   const { contactId } = req.params;
@@ -7,8 +8,7 @@ const updateContactController = asyncHandler(async (req, res) => {
   const { name, email, phone } = req.body;
 
   if (!name && !email && !phone) {
-    res.status(400);
-    throw new Error('Missing fields.');
+    throw new AppError(400, "Error. Missing fields.");
   }
 
   const contact = await Contacts.findByIdAndUpdate(
@@ -17,11 +17,10 @@ const updateContactController = asyncHandler(async (req, res) => {
     { new: true }
   );
   if (!contact) {
-    res.status(404);
-    throw new Error(`Contact with id:${contactId} was not found`);
+    throw new AppError(404, `Contact with id=${contactId} not found`);
   }
 
-  res.status(200).json({ message: 'Success. Contact data updated.', contact });
+  res.status(200).json({ message: "Success. Contact data updated.", contact });
 });
 
 module.exports = updateContactController;
