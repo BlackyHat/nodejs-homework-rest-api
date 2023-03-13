@@ -1,27 +1,16 @@
 const asyncHandler = require("express-async-handler");
-const Contacts = require("../../models/contact.model");
-const { AppError } = require("../../utils");
+const { toggleFavorite } = require("../../services/contactsService");
 
 const toggleFavoriteController = asyncHandler(async (req, res) => {
   const { contactId } = req.params;
   const { favorite } = req.body;
+  const { _id: userId } = req.user;
 
-  if (!favorite) {
-    throw new AppError(400, "Error. Missing field favorite.");
-  }
+  await toggleFavorite(contactId, favorite, userId);
 
-  const contact = await Contacts.findByIdAndUpdate(
-    contactId,
-    { $set: { ...req.body } },
-    { new: true }
-  );
-
-  if (!contact) {
-    throw new AppError(404, `Contact with id:${contactId} was not found`);
-  }
   res.status(200).json({
     message: `Success. Contact was ${
-      favorite ? "added" : "deleted"
+      favorite === "true" ? "added" : "deleted"
     } to favorite.`,
   });
 });

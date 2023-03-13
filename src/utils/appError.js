@@ -4,4 +4,10 @@ class AppError extends Error {
     this.status = status;
   }
 }
-module.exports = AppError;
+class NotAuthorizedError extends Error {
+  constructor(message) {
+    super(message);
+    this.status = 401;
+  }
+}
+module.exports = { AppError, NotAuthorizedError };

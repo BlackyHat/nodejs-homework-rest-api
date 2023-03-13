@@ -1,12 +1,9 @@
 const asyncHandler = require("express-async-handler");
-const Contacts = require("../../models/contact.model");
-const { AppError } = require("../../utils");
+const { getContacts } = require("../../services/contactsService");
 
-const getAllContactsController = asyncHandler(async (_, res) => {
-  const contacts = await Contacts.find({});
-  if (!contacts) {
-        throw new AppError(400, "Error. Failed to get contacts.");
-  }
+const getAllContactsController = asyncHandler(async (req, res) => {
+  const { _id: userId } = req.user;
+  const contacts = await getContacts(userId);
   res.status(200).json({ message: "Success.", qty: contacts.length, contacts });
 });
 

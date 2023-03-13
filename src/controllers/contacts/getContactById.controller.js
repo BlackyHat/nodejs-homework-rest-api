@@ -1,14 +1,10 @@
 const asyncHandler = require("express-async-handler");
-const Contacts = require("../../models/contact.model");
-const { AppError } = require("../../utils");
+const { getContactById } = require("../../services/contactsService");
 
 const getContactByIdController = asyncHandler(async (req, res) => {
+  const { _id: userId } = req.user;
   const { contactId } = req.params;
-  const contactById = await Contacts.findById(contactId);
-  if (!contactById) {
-    throw new AppError(404, `Contact with id=${contactId} not found`);
-  }
-
+  const contactById = await getContactById(userId, contactId);
   res.status(200).json(contactById);
 });
 

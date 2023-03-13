@@ -1,3 +1,3 @@
-const AppError = require("./appError");
+const { AppError, NotAuthorizedError } = require("./appError");
 
-module.exports = { AppError };
+module.exports = { AppError, NotAuthorizedError };
