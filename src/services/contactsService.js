@@ -1,23 +1,36 @@
 const Contacts = require("../models/contact.model");
 const { AppError } = require("../utils");
 
-const getContacts = async (userId) => {
-  const contacts = await Contacts.find({ userId });
+const getContacts = async (owner, page, limit, favorite) => {
+  let query = {
+    owner,
+  };
+
+  if (typeof favorite === "boolean") {
+    query.favorite = toString(favorite);
+  }
+
+  const contacts = await Contacts.find(query)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .exec();
+
   if (!contacts) {
     throw new AppError(400, "Error. Failed to get contacts.");
   }
-  return contacts;
+  const count = await countContacts(query);
+  return { count, contacts };
 };
 
-const getContactById = async (userId, contactId) => {
-  const contactById = await Contacts.findOne({ _id: contactId, userId });
+const getContactById = async (owner, contactId) => {
+  const contactById = await Contacts.findOne({ _id: contactId, owner });
   if (!contactById) {
     throw new AppError(404, `Contact with id=${contactId} not found`);
   }
   return contactById;
 };
 
-const addContact = async (newContact, userId) => {
+const addContact = async (newContact, owner) => {
   const { name, phone, email } = newContact;
 
   if (!name) {
@@ -28,14 +41,14 @@ const addContact = async (newContact, userId) => {
     throw new AppError(400, "Error. Missing required email field.");
   }
 
-  const contact = new Contacts({ ...newContact, userId });
+  const contact = new Contacts({ ...newContact, owner });
   await contact.save();
 };
 
-const removeContact = async (contactId, userId) => {
+const removeContact = async (contactId, owner) => {
   const removedContact = await Contacts.findOneAndRemove({
     _id: contactId,
-    userId,
+    owner,
   });
   if (!removedContact) {
     throw new AppError(404, `Contact with id:${contactId} was not found`);
@@ -43,7 +56,7 @@ const removeContact = async (contactId, userId) => {
   return removedContact;
 };
 
-const updateContact = async (contactId, updatedContact, userId) => {
+const updateContact = async (contactId, updatedContact, owner) => {
   const { name, email, phone } = updatedContact;
 
   if (!name && !email && !phone) {
@@ -51,7 +64,7 @@ const updateContact = async (contactId, updatedContact, userId) => {
   }
 
   const contact = await Contacts.findOneAndUpdate(
-    { _id: contactId, userId },
+    { _id: contactId, owner },
     { $set: updatedContact },
     { new: true }
   );
@@ -62,13 +75,13 @@ const updateContact = async (contactId, updatedContact, userId) => {
   return contact;
 };
 
-const toggleFavorite = async (contactId, favorite, userId) => {
+const toggleFavorite = async (contactId, favorite, owner) => {
   if (!favorite) {
     throw new AppError(400, "Error. Missing field favorite.");
   }
 
   const updatedContact = await Contacts.findOneAndUpdate(
-    { _id: contactId, userId },
+    { _id: contactId, owner },
     { $set: { favorite } },
     { new: true }
   );
@@ -78,6 +91,10 @@ const toggleFavorite = async (contactId, favorite, userId) => {
   }
 };
 
+const countContacts = async (props) => {
+  return await Contacts.count({ ...props });
+};
+
 module.exports = {
   getContacts,
   getContactById,
@@ -85,4 +102,5 @@ module.exports = {
   removeContact,
   updateContact,
   toggleFavorite,
+  countContacts,
 };

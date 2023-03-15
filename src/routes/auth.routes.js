@@ -1,10 +1,27 @@
 const router = require("express").Router();
+const authMiddleware = require("../middlewares/authMiddleware");
 
-const { loginController, registerController } = require("../controllers/users");
+const {
+  loginController,
+  registerController,
+  logoutController,
+  currentUserController,
+  updateSubscriptionController,
+} = require("../controllers/users");
+const {
+  validateAuth,
+  validateSubscription,
+} = require("../validation/auth.validation");
 
-// const { validateContact } = require('../validation/contact.validation');
-
-router.post("/register", registerController);
-router.post("/login", loginController);
+router.post("/register", validateAuth, registerController);
+router.post("/login", validateAuth, loginController);
+router.post("/logout", authMiddleware, logoutController);
+router.post("/current", authMiddleware, currentUserController);
+router.patch(
+  "/",
+  authMiddleware,
+  validateSubscription,
+  updateSubscriptionController
+);
 
 module.exports = { authRouter: router };

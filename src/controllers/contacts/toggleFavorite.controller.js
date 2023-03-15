@@ -1,12 +1,12 @@
 const asyncHandler = require("express-async-handler");
-const { toggleFavorite } = require("../../services/contactsService");
+const { toggleFavorite } = require("../../services");
 
 const toggleFavoriteController = asyncHandler(async (req, res) => {
   const { contactId } = req.params;
   const { favorite } = req.body;
-  const { _id: userId } = req.user;
+  const { _id: owner } = req.user;
 
-  await toggleFavorite(contactId, favorite, userId);
+  await toggleFavorite(contactId, favorite, owner);
 
   res.status(200).json({
     message: `Success. Contact was ${

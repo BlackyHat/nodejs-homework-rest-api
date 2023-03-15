@@ -1,7 +1,11 @@
-const { Schema, SchemaTypes, model } = require("mongoose");
+const { Schema, model } = require("mongoose");
 
 const contactSchema = new Schema(
   {
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+    },
     name: {
       type: String,
       unique: true,
@@ -12,7 +16,6 @@ const contactSchema = new Schema(
       unique: true,
       required: [true, "Set phone for contact."],
     },
-    userId: String,
     email: {
       type: String,
       unique: true,
@@ -27,6 +30,5 @@ const contactSchema = new Schema(
     versionKey: false,
   }
 );
-contactSchema.owner = { type: SchemaTypes.ObjectId, ref: "users" };
 
 module.exports = model("contact", contactSchema);
