@@ -8,16 +8,19 @@ const contactSchema = new Schema(
     },
     name: {
       type: String,
+      trim: true,
       unique: true,
       required: [true, "Set name for contact."],
     },
     phone: {
       type: String,
+      trim: true,
       unique: true,
       required: [true, "Set phone for contact."],
     },
     email: {
       type: String,
+      trim: true,
       unique: true,
       required: [true, "Set email for contact."],
     },

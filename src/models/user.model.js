@@ -5,10 +5,13 @@ const userSchema = new Schema(
   {
     password: {
       type: String,
+      trim: true,
       required: [true, "Set password for user"],
     },
     email: {
       type: String,
+      trim: true,
+      lowercase: true,
       required: [true, "Email is required"],
       unique: true,
     },
@@ -18,6 +21,7 @@ const userSchema = new Schema(
       default: "starter",
     },
     token: String,
+    avatarURL: String,
   },
   {
     versionKey: false,
