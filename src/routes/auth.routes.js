@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const authMiddleware = require("../middlewares/authMiddleware");
+const {authMiddleware, upload} = require("../middlewares");
 
 const {
   loginController,
@@ -7,11 +7,13 @@ const {
   logoutController,
   currentUserController,
   updateSubscriptionController,
+  updateAvatarController,
 } = require("../controllers/users");
 const {
   validateAuth,
   validateSubscription,
 } = require("../validation/auth.validation");
+
 
 router.post("/register", validateAuth, registerController);
 router.post("/login", validateAuth, loginController);
@@ -23,5 +25,7 @@ router.patch(
   validateSubscription,
   updateSubscriptionController
 );
+
+router.patch("/avatars", authMiddleware, upload, updateAvatarController);
 
 module.exports = { authRouter: router };

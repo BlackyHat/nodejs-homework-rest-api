@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const { updatedSubscription } = require("../../services");
+const { updatedProfile } = require("../../services");
 
 const updateSubscriptionController = asyncHandler(async (req, res) => {
   const {
@@ -7,7 +7,7 @@ const updateSubscriptionController = asyncHandler(async (req, res) => {
     body: { subscription },
   } = req;
 
-  await updatedSubscription(id, subscription);
+  await updatedProfile(id, subscription);
   res.status(200).json({ message: "Success.", user: { email, subscription } });
 });
 

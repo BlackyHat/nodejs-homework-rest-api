@@ -21,7 +21,7 @@ const userSchema = new Schema(
       default: "starter",
     },
     token: String,
-    avatarURL: String,
+    avatarUrl: String,
   },
   {
     versionKey: false,
