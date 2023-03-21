@@ -8,12 +8,17 @@ const {
   currentUserController,
   updateSubscriptionController,
   updateAvatarController,
+  verificationTokenController,
+  reVerificationController
 } = require("../controllers/users");
 const {
   validateAuth,
   validateSubscription,
 } = require("../validation/auth.validation");
 
+
+router.get("/verify/:verificationToken", verificationTokenController);
+router.post("/verify", reVerificationController);
 
 router.post("/register", validateAuth, registerController);
 router.post("/login", validateAuth, loginController);

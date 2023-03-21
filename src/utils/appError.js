@@ -16,4 +16,11 @@ class ConflictError extends Error {
     this.status = 409;
   }
 }
-module.exports = { AppError, NotAuthorizedError, ConflictError };
+class NotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.status = 404;
+    this.message = 'Not found.'
+  }
+}
+module.exports = { AppError, NotAuthorizedError, ConflictError, NotFoundError };
