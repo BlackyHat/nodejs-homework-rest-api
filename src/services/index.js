@@ -1,9 +1,4 @@
-const {
-  register,
-  login,
-  logout,
-  updatedSubscription,
-} = require("./authService");
+const { register, login, logout, updatedProfile } = require("./authService");
 const {
   getContacts,
   getContactById,
@@ -14,15 +9,18 @@ const {
   countContacts,
 } = require("./contactsService");
 
+const { uploadAvatar } = require("./avatarService");
+
 module.exports = {
   register,
   login,
   logout,
-  updatedSubscription,
+  updatedProfile,
   getContacts,
   getContactById,
   addContact,
   removeContact,
   updateContact,
   toggleFavorite,
+  uploadAvatar,
 };

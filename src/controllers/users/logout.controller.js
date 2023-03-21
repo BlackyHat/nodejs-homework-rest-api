@@ -5,7 +5,7 @@ const logoutController = asyncHandler(async (req, res) => {
   const { _id: userId } = req.user;
 
   await logout(userId);
-  res.status(204).json({ message: "Logout success." });
+  res.sendStatus(204);
 });
 
 module.exports = logoutController;

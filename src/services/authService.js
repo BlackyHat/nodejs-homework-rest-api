@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
 const User = require("../models/user.model");
 const { NotAuthorizedError, ConflictError } = require("../utils/appError");
 const { JWT_SECRET } = process.env;
@@ -13,7 +14,8 @@ const register = async (credentials) => {
     throw new ConflictError(`Email in use.`);
   }
 
-  const newUser = new User({ email, password });
+  const avatarUrl = gravatar.url(email, { s: "250", r: "pg", d: "mp" });
+  const newUser = new User({ email, password, avatarUrl });
   await newUser.save();
 
   newUser.token = jwt.sign(
@@ -61,13 +63,13 @@ const logout = async (id) => {
   await User.findByIdAndUpdate(id, { token: "" });
 };
 
-const updatedSubscription = async (id, subscription) => {
-  await User.findOneAndUpdate(id, { subscription });
+const updatedProfile = async (id, data) => {
+  await User.findOneAndUpdate(id, { data });
 };
 
 module.exports = {
   register,
   login,
   logout,
-  updatedSubscription,
+  updatedProfile,
 };
