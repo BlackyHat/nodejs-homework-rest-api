@@ -111,7 +111,7 @@ module.exports = {
       },
     ],
     'space-before-function-paren': [
-      'error',
+      'off',
       {
         anonymous: 'never',
         asyncArrow: 'always',
@@ -120,6 +120,7 @@ module.exports = {
     ],
     'use-isnan': 'error',
     'wrap-iife': 'error',
+    'func-names': ['error', 'never'],
     yoda: 'error',
   },
   overrides: [
