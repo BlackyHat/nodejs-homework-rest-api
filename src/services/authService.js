@@ -2,14 +2,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { randomUUID } = require("crypto");
 const gravatar = require('gravatar');
-const sgMail = require('@sendgrid/mail');
 const User = require('../models/user.model');
+const {sendVerificationEmail, sendReVerificationEmail} = require('../utils')
 const { NotAuthorizedError, ConflictError, NotFoundError, AppError } = require('../utils/appError');
 
-const { JWT_SECRET, SENDGRID_API_KEY, SENDGRID_EMAIL } = process.env;
-const baseURL = `http://localhost:8080/api`;
+const { JWT_SECRET} = process.env;
 
-sgMail.setApiKey(SENDGRID_API_KEY);
 
 const register = async (credentials) => {
   const { password, email } = credentials;
@@ -27,17 +25,11 @@ const register = async (credentials) => {
   const newUser = new User({ email, password, avatarUrl, verificationToken });
   await newUser.save();
 
-  const msg = {
-    to: email,
-    from: SENDGRID_EMAIL,
-    subject: 'Thank you for registration!',
-    text: `Welcome to the service. To get full access follow the link: ${baseURL}/users/verify/${verificationToken}`,
-    html: `<strong>Welcome to the service. To get full access follow the link: ${baseURL}/users/verify/${verificationToken}</strong>`,
-  };
-  await sgMail.send(msg);
-
+  await sendVerificationEmail(email, verificationToken);
   return newUser;
 };
+
+  
 
 const login = async (credentials) => {
   const { password, email } = credentials;
@@ -86,38 +78,35 @@ const verificateProfile = async (verificationToken) => {
   if (!user) {
     throw new NotFoundError();
   }
-const newUser =  await User.findOneAndUpdate({ _id: user._id }, {$set: {verificationToken: null, verify: true}}, {new:true});
-console.log(newUser)  
+/**
+ * user.verificationToken = null; user.verify = true; await user.save();
+ */
+ await User.findOneAndUpdate({ _id: user._id }, {$set: {verificationToken: null, verify: true}}, {new:true});
 return;
 };
 
 const reVerificateProfile = async (userData) => {
-const {email}= userData;
-if (!email) {
-  throw new AppError(400, "Error. Missing required email field.");}
-
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw new NotFoundError();
-  }
-  if (user.verify) {
-    throw new AppError(400, 'Verification has already been passed');
-  }
-
-
-  const verificationToken = randomUUID();
-  await User.findOneAndUpdate({ _id: user._id}, {$set: {verificationToken }});
-
-  const msg = {
-    to: email,
-    from: SENDGRID_EMAIL,
-    subject: 'Thank you for registration!',
-    text: `Welcome to the service. To get full access follow the link: ${baseURL}/users/verify/${verificationToken}`,
-    html: `<strong>Welcome to the service. To get full access follow the link: ${baseURL}/users/verify/${verificationToken}</strong>`,
+  const {email}= userData;
+  if (!email) {
+    throw new AppError(400, "Error. Missing required email field.");}
+  
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new NotFoundError();
+    }
+    if (user.verify) {
+      throw new AppError(400, 'Verification has already been passed');
+    }
+  
+  
+    const verificationToken = randomUUID();
+    await User.findOneAndUpdate({ _id: user._id}, {$set: {verificationToken }});
+  
+    await sendReVerificationEmail(email, verificationToken);
+    return;
   };
-  await sgMail.send(msg);
-  return;
-};
+  
+
 
 module.exports = {
   register,

@@ -25,7 +25,7 @@ CRUD-operations, MongoDB, Mongoose;
 Build authentication/authorization logic using bcrypt, jwt-token;
 Upload/download images to MongoDB;
 Write unit-test with Jest;
-Work with SendGrid API and verification user by email;
+Work with SendGrid API and verification user by sending confirmation link on email;
 
 
 
@@ -36,6 +36,8 @@ To run this project, you will need to add the following environment variables to
 `PORT`
 `MONGODB_HOST_URI`
 `JWT_SECRET`
+`SENDGRID_API_KEY`
+`SENDGRID_EMAIL`
 
 
 ## 🔗 Links
