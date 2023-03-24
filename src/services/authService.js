@@ -3,8 +3,7 @@ const jwt = require('jsonwebtoken');
 const { randomUUID } = require("crypto");
 const gravatar = require('gravatar');
 const User = require('../models/user.model');
-const {sendVerificationEmail, sendReVerificationEmail} = require('../utils')
-const { NotAuthorizedError, ConflictError, NotFoundError, AppError } = require('../utils/appError');
+const {sendVerificationEmail, sendReVerificationEmail,NotAuthorizedError, ConflictError, NotFoundError, AppError} = require('../utils')
 
 const { JWT_SECRET} = process.env;
 
@@ -34,17 +33,13 @@ const register = async (credentials) => {
 const login = async (credentials) => {
   const { password, email } = credentials;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, verify:true });
   if (!user) {
     throw new NotAuthorizedError('Email or password is wrong');
   }
 
   if (!(await bcrypt.compare(password, user.password))) {
     throw new NotAuthorizedError('Email or password is wrong');
-  }
-
-  if (!user.verify){
-    throw new NotAuthorizedError('Account is not activated');
   }
 
   user.token = jwt.sign(
@@ -74,14 +69,11 @@ const updatedProfile = async (id, data) => {
 };
 
 const verificateProfile = async (verificationToken) => {
-  const user = await User.findOne({ verificationToken });
+  const user = await User.findOne({ verificationToken, verify: false });
   if (!user) {
     throw new NotFoundError();
   }
-/**
- * user.verificationToken = null; user.verify = true; await user.save();
- */
- await User.findOneAndUpdate({ _id: user._id }, {$set: {verificationToken: null, verify: true}}, {new:true});
+ await User.findOneAndUpdate({ _id: user._id }, {$set: {verificationToken: null, verify: true}});
 return;
 };
 
