@@ -1,9 +1,12 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const gravatar = require("gravatar");
-const User = require("../models/user.model");
-const { NotAuthorizedError, ConflictError } = require("../utils/appError");
-const { JWT_SECRET } = process.env;
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { randomUUID } = require("crypto");
+const gravatar = require('gravatar');
+const User = require('../models/user.model');
+const {sendVerificationEmail, sendReVerificationEmail,NotAuthorizedError, ConflictError, NotFoundError, AppError} = require('../utils')
+
+const { JWT_SECRET} = process.env;
+
 
 const register = async (credentials) => {
   const { password, email } = credentials;
@@ -11,34 +14,32 @@ const register = async (credentials) => {
   const candidate = await User.findOne({ email });
 
   if (candidate) {
-    throw new ConflictError(`Email in use.`);
+    throw new ConflictError('Email in use.');
   }
 
-  const avatarUrl = gravatar.url(email, { s: "250", r: "pg", d: "mp" });
-  const newUser = new User({ email, password, avatarUrl });
+  const verificationToken = randomUUID();
+
+  const avatarUrl = gravatar.url(email, { s: '250', r: 'pg', d: 'mp' });
+
+  const newUser = new User({ email, password, avatarUrl, verificationToken });
   await newUser.save();
 
-  newUser.token = jwt.sign(
-    {
-      id: newUser._id,
-    },
-    JWT_SECRET,
-    { expiresIn: "3h" }
-  );
-  await User.findByIdAndUpdate(newUser._id, { token: newUser.token });
+  await sendVerificationEmail(email, verificationToken);
   return newUser;
 };
+
+  
 
 const login = async (credentials) => {
   const { password, email } = credentials;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, verify:true });
   if (!user) {
-    throw new NotAuthorizedError(`Email or password is wrong`);
+    throw new NotAuthorizedError('Email or password is wrong');
   }
 
   if (!(await bcrypt.compare(password, user.password))) {
-    throw new NotAuthorizedError("Email or password is wrong");
+    throw new NotAuthorizedError('Email or password is wrong');
   }
 
   user.token = jwt.sign(
@@ -46,7 +47,7 @@ const login = async (credentials) => {
       id: user._id,
     },
     JWT_SECRET,
-    { expiresIn: "3h" }
+    { expiresIn: '12h' }
   );
 
   await User.findByIdAndUpdate(user._id, { token: user.token });
@@ -57,19 +58,53 @@ const logout = async (id) => {
   const user = await User.findById(id);
 
   if (!user) {
-    next(new NotAuthorizedError(`Not authorized.`));
+    throw new NotAuthorizedError('Not authorized.');
   }
 
-  await User.findByIdAndUpdate(id, { token: "" });
+  await User.findByIdAndUpdate(id, { token: '' });
 };
 
 const updatedProfile = async (id, data) => {
   await User.findOneAndUpdate(id, { data });
 };
 
+const verificateProfile = async (verificationToken) => {
+  const user = await User.findOne({ verificationToken, verify: false });
+  if (!user) {
+    throw new NotFoundError();
+  }
+ await User.findOneAndUpdate({ _id: user._id }, {$set: {verificationToken: null, verify: true}});
+return;
+};
+
+const reVerificateProfile = async (userData) => {
+  const {email}= userData;
+  if (!email) {
+    throw new AppError(400, "Error. Missing required email field.");}
+  
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new NotFoundError();
+    }
+    if (user.verify) {
+      throw new AppError(400, 'Verification has already been passed');
+    }
+  
+  
+    const verificationToken = randomUUID();
+    await User.findOneAndUpdate({ _id: user._id}, {$set: {verificationToken }});
+  
+    await sendReVerificationEmail(email, verificationToken);
+    return;
+  };
+  
+
+
 module.exports = {
   register,
   login,
   logout,
   updatedProfile,
+  verificateProfile,
+  reVerificateProfile
 };
